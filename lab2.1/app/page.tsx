@@ -21,12 +21,17 @@ export default function Home() {
     const response = await axios.get("http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=" + artistName + "&api_key=" + apiKey + "&format=json")
     console.log(response.data);
 
-    setSimilarArtists(response.data);
+    setSimilarArtists(response.data.similarartists?.artist.map((a: any) => a.name));
+    console.log(similarArtists);
   }
 
   // Requête #2
   async function getTopSongs(){
+    const response = await axios.get("http://ws.audioscrobbler.com/2.0/?method=tag.gettoptracks&tag=" + genre + "&api_key=" + apiKey + "&format=json")
+    console.log(response.data);
 
+    setSongs(response.data.tracks.track.map((track: any) => {return new Song(track.name,track.artist.name,Number(track.duration))}));
+    console.log(songs);
   }
 
   return (
@@ -49,13 +54,16 @@ export default function Home() {
 
           {/* Données */}
           <div className="text-xl">Résultats :</div>
+          {similarArtists.length === 0 ? (
+            <h3 className="ml-4">Réessayez avec un artiste qui existe</h3>
+          ) : (
           <ul className="list-disc ml-4 text-sm">
               {
-                similarArtists.map((v) =>
-                  <li>{v}</li>
+                similarArtists.map((artist) =>
+                  <li key={artist}>{artist}</li>
                 )
               }
-          </ul>
+          </ul>)}
         </div>
 
         {/* Colonne pas à gauche : Obtenir les meilleurs chansons d'un genre */}
@@ -72,11 +80,16 @@ export default function Home() {
 
           {/* Données */}
           <div className="text-xl">Résultats :</div>
+          {songs.length === 0 ? (
+            <h3 className="ml-4">Réessayez avec un genre qui existe</h3>
+          ) : (
           <ul className="list-disc ml-4 text-sm">
-            <li>NOM_CHANSON de NOM_ARTISTE (DURÉE_CHANSON secondes)</li>
-            <li>NOM_CHANSON de NOM_ARTISTE (DURÉE_CHANSON secondes)</li>
-            <li>etc.</li>
-          </ul>
+              {
+                songs.map((song) =>
+                  <li key={song.name}>{song.name} de {song.artist} ({song.duration} secondes)</li>
+                )
+              }
+          </ul>)}
         </div>
 
       </div>
